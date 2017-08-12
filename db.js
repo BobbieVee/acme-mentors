@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
-const db = new Sequelize(process.env.DATABASE_URL);
+// const db = new Sequelize(process.env.DATABASE_URL);
+
+const db = new Sequelize('postgres://localhost/acme_mentors')
 
 const User = db.define('user', {
 	name: Sequelize.STRING
@@ -26,7 +28,7 @@ const seed = () => {
 			Award.create({title: 'Wicked-good Wizard', userId: gandolf.id}),
 			Award.create({title: 'Bearer of the Ring', userId: frodo.id}),
 			Award.create({title: 'Disappearing Hobbit', userId: frodo.id}),
-			User.update({mentorId: frodo.id}, {where: {id: sam.id}})
+			User.update({mentorId: frodo.id}, {where: {id: sam.id}}),
 		])
 	})
 	.catch(err => console.log(err))
@@ -34,5 +36,7 @@ const seed = () => {
 
 module.exports = {
 	sync,
-	seed
+	seed,
+	User,
+	Award
 };
