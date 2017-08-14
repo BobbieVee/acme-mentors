@@ -7,23 +7,43 @@ const User = db.define('user', {
 	name: Sequelize.STRING
 });
 
+const Award = db.define('award', {
+	title: Sequelize.STRING
+});
+
 User.findUsersViewModel = function() {
   return User.findAll({
   	include: [{
   		model: User, 
 			as: "mentor",
 			attributes: ['name', 'id']
-		}, {model: Award, as: 'award', attributes: ['title', 'userId']}]
+		}, {
+			model: Award, 
+			as: 'award', 
+			attributes: ['title', 'userId']
+		}]
   })
   .then( (users) => {
-  	return users;
+  	// Create view model from all user info:
+  	let viewModel = users.reduce((memo, user) => {
+
+  		// If mentor and/or awards exist, populate object or Array
+  		const mentor = (user.mentor) ? {'mentorName': user.mentor.name, 'mentorId': user.mentor.id} : {};
+  		const awards = (user.award) ? awardData(user.award) : [];
+
+  		memo.push({'name': user.name, 'id': user.id, mentor, 'awards': awards})
+  		return memo;
+  	}, []);
+  	return viewModel;
   } )
 };
 
-const Award = db.define('award', {
-	title: Sequelize.STRING
-});
-
+const awardData = (awards) => {
+return awards.reduce((memo, award) => {
+		memo.push({'title': award.title});
+		return memo;
+	}, []);
+};
 
 // Award.belongsTo(User, {as: 'user', foreignKey: 'userId' });
 // User.hasOne(User, { as: 'mentee', foreignKey: 'menteeId'});

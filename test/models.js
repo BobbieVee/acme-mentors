@@ -40,12 +40,12 @@ describe('Acme Users Mentors', function(){
 		it('findUsersViewModel() returns viewModel', function(){
 			return User.findUsersViewModel() 
 			.then(viewModel => {
-				console.log('viewModel[1].award.title = ', viewModel[1].award[0].title)
-				expect(viewModel[1].mentor.name).to.equal('Gandolf the White');
-				expect(viewModel[1].award[0].title).to.equal('Fellowship of the Ring');
-				expect(viewModel[1].mentor.id).to.equal(3);
+				expect(viewModel[0].awards[0].title).to.equal('Wicked-good Wizard');
+				expect(viewModel[2].awards.length).to.equal(2);
+				expect(viewModel[1].mentor.mentorName).to.equal('Gandolf the White');
 				expect(viewModel.length).to.equal(3);
-				expect(viewModel[0].id).to.equal(3);
+				expect(viewModel[1].name).to.equal('Samwise Gamgee');
+				expect(viewModel[1].id).to.equal(1);
 			})
 			.catch((err) => console.error(err))
 		})

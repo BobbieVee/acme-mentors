@@ -9,6 +9,19 @@ const redirect = (res)=> {
 };
 
 //READ
+// viewModel=   [ { name: 'Gandolf the White',
+//     id: 3,
+//     mentor: {},
+//     awards: [ [Object] ] },
+//   { name: 'Samwise Gamgee',
+//     id: 1,
+//     mentor: { mentorName: 'Gandolf the White', mentorId: 3 },
+//     awards: [ [Object] ] },
+//   { name: 'Frodo Baggins',
+//     id: 2,
+//     mentor: { mentorName: 'Gandolf the White', mentorId: 3 },
+//     awards: [ [Object], [Object] ] } ]
+//   AwardsArray: (viewModel[0].awards[0].title).to.equal('Wicked-good Wizard')
 router.get('/', (req, res, next)=> {
   User.findUsersViewModel()
     .then(( viewModel )=> {
