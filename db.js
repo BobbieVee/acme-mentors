@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const faker = require('faker');
 // const db = new Sequelize(process.env.DATABASE_URL);
 
 const db = new Sequelize('postgres://localhost/acme_mentors', {logging: false})
@@ -11,7 +12,7 @@ const Award = db.define('award', {
 	title: Sequelize.STRING
 });
 
-User.findUsersViewModel = function() {
+User.findUsersViewModel = () => {
   return User.findAll({
   	include: [{
   		model: User, 
@@ -20,7 +21,7 @@ User.findUsersViewModel = function() {
 		}, {
 			model: Award, 
 			as: 'award', 
-			attributes: ['title', 'userId']
+			attributes: ['title', 'userId', 'id']
 		}]
   })
   .then( (users) => {
@@ -31,7 +32,7 @@ User.findUsersViewModel = function() {
   		const mentor = (user.mentor) ? {'mentorName': user.mentor.name, 'mentorId': user.mentor.id} : {};
   		const awards = (user.award) ? awardData(user.award) : [];
 
-  		memo.push({'name': user.name, 'id': user.id, mentor, 'awards': awards})
+  		memo.push({'name': user.name, 'id': user.id, mentor, 'awards': awards});
   		return memo;
   	}, []);
   	return viewModel;
@@ -40,13 +41,24 @@ User.findUsersViewModel = function() {
 
 const awardData = (awards) => {
 return awards.reduce((memo, award) => {
-		memo.push({'title': award.title});
+		memo.push({'title': award.title, 'awardId': award.id });
 		return memo;
 	}, []);
 };
 
-// Award.belongsTo(User, {as: 'user', foreignKey: 'userId' });
-// User.hasOne(User, { as: 'mentee', foreignKey: 'menteeId'});
+User.destroyById = (id) => {
+	return User.destroy({where: {id: id}})
+	.then(numberDeleted => numberDeleted);
+};
+
+User.generateAward = (id) => {
+	return Award.create({title: faker.company.catchPhrase(), userId: id});
+};
+
+User.removeAward = (awardId) => {
+	return Award.destroy({where: {id: awardId}});
+};
+
 User.belongsTo(User,{ as: 'mentor', foreignKey: 'mentorId'});
 User.hasMany(Award, {as: 'award', foreignKey: 'userId' });
 

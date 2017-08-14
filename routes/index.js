@@ -39,7 +39,7 @@ router.post('/', (req, res, next)=> {
 
 //DELETE
 router.delete('/:id', (req, res, next)=> {
-  User.destroyById(req.params.id)
+  User.delete(req.params.id)
     .then(redirect(res))
     .catch( next);
 });

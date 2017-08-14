@@ -5,7 +5,7 @@ const User = db.models.User;
 const Award = db.models.Award;
 
 describe('Acme Users Mentors', function(){
-	describe('seeding:', function(){
+	describe('After seeding:', function(){
 		before(()=> {
     	return db.sync()
       .then(()=> {
@@ -48,6 +48,44 @@ describe('Acme Users Mentors', function(){
 				expect(viewModel[1].id).to.equal(1);
 			})
 			.catch((err) => console.error(err))
-		})
+		});
+		it('creates new user', function(){
+			return User.create({name: "Professor Biggins"})
+			.then((user) => {
+				expect(user.name).to.equal('Professor Biggins');
+				expect(user.id).to.equal(4)
+			})
+			.catch(err => console.error(err));
+		});
+		it('deletes this new user', function() {
+			return User.destroyById(4)
+			.then((numberDeleted) => expect(numberDeleted).to.equal(1))
+			.catch(err => console.error(err));
+		});
+		it('removes mentor from user', function() {
+			return User.update({mentorId: null}, {where: {id: 1}})
+			.then(() => User.findById(1))
+			.then((user) => expect(user.mentorId).to.equal(null))
+			.catch(err => console.error(err));
+		});
+		it('adds new mentor from user', function() {
+			return User.update({mentorId: 2}, {where: {id: 1}})
+			.then(() => User.findById(1))
+			.then((user) => expect(user.mentorId).to.equal(2))
+			.catch(err => console.error(err));
+		});
+		it('adds new award to user', function() {
+			return User.generateAward(2)
+			.then(() => User.findUsersViewModel())
+			.then((viewModel) => expect(viewModel[1].awards.length).to.equal(3))
+			.catch(err => console.error(err));
+		});
+		it('removes newly added award', function() {
+			return User.removeAward(5)
+			.then(() => User.findUsersViewModel())
+			.then((viewModel) => expect(viewModel[1].awards.length).to.equal(2))
+			.catch(err => console.error(err));
+		});
+
 	});
 })
