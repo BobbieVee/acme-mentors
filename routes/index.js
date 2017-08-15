@@ -25,13 +25,15 @@ const redirect = (res)=> {
 router.get('/', (req, res, next)=> {
   User.findUsersViewModel()
     .then(( viewModel )=> {
-      res.render('users', viewModel);
+    	console.log('viewModel = ', {users: viewModel})
+      res.render('users', {users: viewModel, usersActive: 'active'});
     })
     .catch(next);
 });
 
 //CREATE
 router.post('/', (req, res, next)=> {
+	console.log('req.body = ', req.body)
   User.create(req.body)
     .then(redirect(res))
     .catch(next);
@@ -39,7 +41,7 @@ router.post('/', (req, res, next)=> {
 
 //DELETE
 router.delete('/:id', (req, res, next)=> {
-  User.delete(req.params.id)
+  User.destroy({where: {id: req.params.id}})
     .then(redirect(res))
     .catch( next);
 });

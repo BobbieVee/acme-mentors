@@ -5,7 +5,11 @@ const path = require('path');
 const port = process.env.PORT || 3000;
 const routes = require('./routes');
 const db = require('./db');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
 
+app.use(methodOverride('_method'));
+app.use(bodyParser.urlencoded({extended: false}));
 swig.setDefaults({cache: false});
 app.set('view engine', "html");
 app.engine('html', swig.renderFile);

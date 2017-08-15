@@ -5,7 +5,11 @@ const faker = require('faker');
 const db = new Sequelize('postgres://localhost/acme_mentors', {logging: false})
 
 const User = db.define('user', {
-	name: Sequelize.STRING
+	name: Sequelize.STRING,
+	canBeMentor: {
+		type: Sequelize.BOOLEAN,
+		defaultValue: false
+	}
 });
 
 const Award = db.define('award', {
@@ -17,7 +21,7 @@ User.findUsersViewModel = () => {
   	include: [{
   		model: User, 
 			as: "mentor",
-			attributes: ['name', 'id']
+			attributes: ['name', 'id', 'canBeMentor']
 		}, {
 			model: Award, 
 			as: 'award', 
@@ -32,9 +36,15 @@ User.findUsersViewModel = () => {
   		const mentor = (user.mentor) ? {'mentorName': user.mentor.name, 'mentorId': user.mentor.id} : {};
   		const awards = (user.award) ? awardData(user.award) : [];
 
-  		memo.push({'name': user.name, 'id': user.id, mentor, 'awards': awards});
+  		memo.push({'name': user.name, 'id': user.id, 'canBeMentor': user.canBeMentor, mentor, 'awards': awards});
   		return memo;
   	}, []);
+  	console.log('viewModel = ', viewModel)
+  	const mentorList = viewModel.reduce((memo, user) => {
+  		if (user.canBeMentor) memo.push({'name': user.name, 'id': user.id, 'test': "test"}) ;
+  		return memo;
+  	}, [])
+  	console.log('mentorList = ', mentorList)
   	return viewModel;
   } )
 };
@@ -46,18 +56,24 @@ return awards.reduce((memo, award) => {
 	}, []);
 };
 
-User.destroyById = (id) => {
-	return User.destroy({where: {id: id}})
-	.then(numberDeleted => numberDeleted);
-};
-
 User.generateAward = (id) => {
-	return Award.create({title: faker.company.catchPhrase(), userId: id});
+	return Award.create({title: faker.company.catchPhrase(), userId: id})
+	.then(() => Award.checkMentor(id)); 
 };
 
 User.removeAward = (awardId) => {
-	return Award.destroy({where: {id: awardId}});
+	return Award.destroy({where: {id: awardId}})
+	.then(() => Award.checkMentor(id));
 };
+
+Award.checkMentor = (id) => {
+	return Award.findAll({where: {userId: id}})
+	.then((awards) => {
+		awards.length > 1 ? User.update({canBeMentor: true}, {where: {id: id}}) : User.update({canBeMentor: false}, {where: {id: id}})
+	});
+};
+
+
 
 User.belongsTo(User,{ as: 'mentor', foreignKey: 'mentorId'});
 User.hasMany(Award, {as: 'award', foreignKey: 'userId' });
@@ -72,10 +88,10 @@ const seed = () => {
 	])
 	.then(([sam, frodo, gandolf]) => {
 		Promise.all([
-			Award.create({title: 'Fellowship of the Ring', userId: sam.id}),
-			Award.create({title: 'Wicked-good Wizard', userId: gandolf.id}),
-			Award.create({title: 'Bearer of the Ring', userId: frodo.id}),
-			Award.create({title: 'Disappearing Hobbit', userId: frodo.id}),
+			User.generateAward(sam.id),
+			User.generateAward(gandolf.id),
+			User.generateAward(frodo.id),
+			User.generateAward(frodo.id),
 			User.update({mentorId: gandolf.id}, {where: {id: sam.id}}),
 			User.update({mentorId: gandolf.id}, {where: {id: frodo.id}}),
 		])
