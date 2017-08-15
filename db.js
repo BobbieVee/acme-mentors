@@ -93,7 +93,7 @@ const seed = () => {
 	Promise.all([
 		User.create({name: "Samwise Gamgee"}),
 		User.create({name: "Frodo Baggins"}),
-		User.create({name: "Gandolf the White"})
+		User.create({name: "Gandalf the White"})
 	])
 	.then(([sam, frodo, gandolf]) => {
 		Promise.all([
