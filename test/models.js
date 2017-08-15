@@ -40,12 +40,11 @@ describe('Acme Users Mentors', function(){
 		it('findUsersViewModel() returns viewModel', function(){
 			return User.findUsersViewModel() 
 			.then(viewModel => {
-				expect(viewModel[0].awards[0].title).to.equal('Wicked-good Wizard');
-				expect(viewModel[2].awards.length).to.equal(2);
-				expect(viewModel[1].mentor.mentorName).to.equal('Gandolf the White');
-				expect(viewModel.length).to.equal(3);
-				expect(viewModel[1].name).to.equal('Samwise Gamgee');
-				expect(viewModel[1].id).to.equal(1);
+				expect(viewModel.users[2].awards.length).to.equal(1);
+				expect(viewModel.users[1].mentor.mentorName).to.equal('Gandolf the White');
+				expect(viewModel.users.length).to.equal(3);
+				expect(viewModel.users[1].name).to.equal('Frodo Baggins');
+				expect(viewModel.users[1].id).to.equal(2);
 			})
 			.catch((err) => console.error(err))
 		});
@@ -58,7 +57,7 @@ describe('Acme Users Mentors', function(){
 			.catch(err => console.error(err));
 		});
 		it('deletes this new user', function() {
-			return User.destroyById(4)
+			return User.destroy({where: {id: 4}})
 			.then((numberDeleted) => expect(numberDeleted).to.equal(1))
 			.catch(err => console.error(err));
 		});
@@ -77,13 +76,13 @@ describe('Acme Users Mentors', function(){
 		it('adds new award to user', function() {
 			return User.generateAward(2)
 			.then(() => User.findUsersViewModel())
-			.then((viewModel) => expect(viewModel[1].awards.length).to.equal(3))
+			.then((viewModel) => expect(viewModel.users[1].awards.length).to.equal(2))
 			.catch(err => console.error(err));
 		});
 		it('removes newly added award', function() {
-			return User.removeAward(5)
+			return User.removeAward(2,5)
 			.then(() => User.findUsersViewModel())
-			.then((viewModel) => expect(viewModel[1].awards.length).to.equal(2))
+			.then((viewModel) => expect(viewModel.users[1].awards.length).to.equal(1))
 			.catch(err => console.error(err));
 		});
 
