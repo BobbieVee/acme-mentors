@@ -27,6 +27,7 @@ User.findUsersViewModel = () => {
 			as: 'award', 
 			attributes: ['title', 'userId', 'id']
 		}]
+		, order: [['id', 'desc']]
   })
   .then( (users) => {
   	// Create view model from all user info:
@@ -41,11 +42,10 @@ User.findUsersViewModel = () => {
   	}, []);
   	console.log('viewModel = ', viewModel)
   	const mentorList = viewModel.reduce((memo, user) => {
-  		if (user.canBeMentor) memo.push({'name': user.name, 'id': user.id, 'test': "test"}) ;
+  		if (user.canBeMentor) memo.push({'name': user.name, 'id': user.id}) ;
   		return memo;
   	}, [])
-  	console.log('mentorList = ', mentorList)
-  	return viewModel;
+  	return {'users': viewModel, 'mentorList': mentorList};
   } )
 };
 
@@ -61,7 +61,7 @@ User.generateAward = (id) => {
 	.then(() => Award.checkMentor(id)); 
 };
 
-User.removeAward = (awardId) => {
+User.removeAward = (id, awardId) => {
 	return Award.destroy({where: {id: awardId}})
 	.then(() => Award.checkMentor(id));
 };
@@ -69,8 +69,19 @@ User.removeAward = (awardId) => {
 Award.checkMentor = (id) => {
 	return Award.findAll({where: {userId: id}})
 	.then((awards) => {
-		awards.length > 1 ? User.update({canBeMentor: true}, {where: {id: id}}) : User.update({canBeMentor: false}, {where: {id: id}})
+		if (awards.length > 1) {
+			User.update({canBeMentor: true}, {where: {id: id}});
+		} 
+		else {
+			User.update({canBeMentor: false}, {where: {id: id}});
+			User.update({mentorId: null}, {where: {mentorId: id}});
+		} 
 	});
+};
+
+User.updateMentor = (reqBody, id) => {
+	const input = reqBody.mentorId === '' ? {mentorId: null} : reqBody;
+	return User.update(input, {where: {id: id}});
 };
 
 
@@ -90,7 +101,7 @@ const seed = () => {
 		Promise.all([
 			User.generateAward(sam.id),
 			User.generateAward(gandolf.id),
-			User.generateAward(frodo.id),
+			User.generateAward(gandolf.id),			
 			User.generateAward(frodo.id),
 			User.update({mentorId: gandolf.id}, {where: {id: sam.id}}),
 			User.update({mentorId: gandolf.id}, {where: {id: frodo.id}}),

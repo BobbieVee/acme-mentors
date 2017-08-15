@@ -6,7 +6,7 @@
 	<label>
 				<input type="text" name="name">
 	</label>
-	<button class='btn btn-primary'>Add User</button>
+	<button class='btn btn-primary btn-xs'>Add User</button>
 	</form>
 </div>
 <div class='container'>	
@@ -21,7 +21,7 @@
 				<div class='well'>
 					<h2 class='text-success'>{{user.name}}</h2>
 					<form action='/users/{{user.id}}?_method=delete' method='post'>
-						<button class='btn btn-danger'>Delete</button>
+						<button class='btn btn-danger btn-xs'>Delete</button>
 					</form>
 				</div>
 
@@ -30,22 +30,42 @@
 					<ul class='list-group'>
 						{% for award in user.awards%}
 							<li class='list-group-item'>
-								<h4>{{award.title}}</h4>
+								<h5>{{award.title}}</h5>
+								<form action='users/{{user.id}}/awards/{{award.awardId}}?_method=delete' method='post'>
+									<button class='btn btn-warning btn-xs'>Remove</button>
+								</form>
 							</li>
 						{% endfor%}
 					</ul>	
 					<form action='/users/{{user.id}}/awards' method='post'>
-						<button  class='btn btn-primary'>Create an Award</button>
+						<button  class='btn btn-primary btn-xs'>Create Award</button>
 					</form>			
 			</div>
 
-
+			<div class='well'>
 				{% if user.mentor.mentorName %}
 					<h4 class='text-primary'>Mentored By: </h4>
 					<h3 class='text-danger'>{{user.mentor.mentorName}}</h3>
+					<form action='/users/{{user.id}}?_method=put' method='post'>
+						<button name='mentorId'  class='btn btn-danger btn-xs'>Remove</button>
+					</form>
 				{% else %}	
 				<h4 class='text-danger'>Pick Mentor! </h4>
-				{% endif %}
+				<form action='/users/{{user.id}}?_method=put' method='post' id='mentorId'>
+					<select class='custom-select' name='mentorId'>
+						{% for mentor in mentorList %}
+							{% if  mentor.id != user.id  %}
+								<option value='{{mentor.id}}'>{{mentor.name}}</option>
+							{% endif %}	
+						{% endfor %}
+					</select>	
+					<br>
+					<input class='btn btn-primary btn-xs' type="submit" value="Submit" style='margin-top: 10px'>			
+				</form>
+
+				{% endif %}				
+			</div>
+
 
 			</div>
 		</div>

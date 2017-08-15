@@ -25,8 +25,9 @@ const redirect = (res)=> {
 router.get('/', (req, res, next)=> {
   User.findUsersViewModel()
     .then(( viewModel )=> {
-    	console.log('viewModel = ', {users: viewModel})
-      res.render('users', {users: viewModel, usersActive: 'active'});
+    	console.log('viewModel = ', viewModel)
+    	console.log('viewModel[0].awards = ', viewModel.users[0].awards)
+      res.render('users', Object.assign({usersActive: 'active'},viewModel));  
     })
     .catch(next);
 });
@@ -46,9 +47,9 @@ router.delete('/:id', (req, res, next)=> {
     .catch( next);
 });
 
-//UPDATE
+//UPDATE MENTOR
 router.put('/:id', (req, res, next)=> {
-  User.updateUserFromRequestBody(req.params.id, req.body)
+	User.updateMentor(req.body, req.params.id)
     .then(redirect(res))
     .catch(next);
 });
@@ -62,6 +63,7 @@ router.post('/:id/awards', (req, res, next)=> {
 
 //DELETE AWARD
 router.delete('/:userId/awards/:id', (req, res, next)=> {
+	console.log('*Here')
   User.removeAward(req.params.userId, req.params.id)
     .then(redirect(res))
     .catch( next);
